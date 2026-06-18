@@ -94,6 +94,8 @@ def _calculate_records(
 ) -> SimpleDataFrame:
     baseline_column = f"{baseline_price_column}_baseline"
     comparison_column = f"{comparison_price_column}_comparison"
+    if not records:
+        return SimpleDataFrame([])
     _validate_record_columns(records, [baseline_column, comparison_column])
     calculated: list[dict[str, Any]] = []
 
@@ -157,6 +159,19 @@ def _calculate_with_pandas(
     baseline_column = f"{baseline_price_column}_baseline"
     comparison_column = f"{comparison_price_column}_comparison"
     _validate_columns(matched_rows.columns, [baseline_column, comparison_column])
+
+    if len(matched_rows) == 0:
+        output = matched_rows.copy()
+        for column in [
+            "price_difference",
+            "price_difference_rate",
+            "margin_rate",
+            "margin_formula_used",
+            "calculation_status",
+            "calculation_warning",
+        ]:
+            output[column] = []
+        return output
 
     output = matched_rows.copy()
     baseline_price = pd.to_numeric(output[baseline_column], errors="coerce")

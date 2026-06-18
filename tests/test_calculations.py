@@ -187,3 +187,33 @@ def test_missing_required_price_column_raises_error() -> None:
             baseline_price_column="price",
             comparison_price_column="price",
         )
+
+
+def test_empty_matched_rows_returns_empty_result() -> None:
+    result = calculate_financial_metrics(
+        [],
+        baseline_price_column="price",
+        comparison_price_column="price",
+    )
+
+    assert records(result) == []
+
+
+def test_unsupported_margin_formula_raises_error() -> None:
+    with pytest.raises(CalculationError, match="Unsupported margin formula"):
+        calculate_financial_metrics(
+            [{"product_code": "001", "price_baseline": 10, "price_comparison": 12}],
+            baseline_price_column="price",
+            comparison_price_column="price",
+            margin_formula="unsupported",  # type: ignore[arg-type]
+        )
+
+
+def test_negative_rounding_decimals_raises_error() -> None:
+    with pytest.raises(CalculationError, match="rounding_decimals"):
+        calculate_financial_metrics(
+            [{"product_code": "001", "price_baseline": 10, "price_comparison": 12}],
+            baseline_price_column="price",
+            comparison_price_column="price",
+            rounding_decimals=-1,
+        )

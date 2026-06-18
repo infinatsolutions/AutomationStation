@@ -132,6 +132,8 @@ Formulas:
 - `gross_margin`: `margin_rate = (comparison_price - cost) / comparison_price`
 - `auto`: use `gross_margin` when a valid cost exists for the row; otherwise use `price_difference_over_comparison`
 
+When both baseline and comparison cost values are present, comparison cost is used for gross margin. If comparison cost is missing, baseline cost is used as a fallback.
+
 Division by zero and missing numeric inputs do not crash the application. They produce missing metric values with `calculation_status` set to `warning` or `invalid` and a human-readable `calculation_warning`. Numeric outputs are rounded with `rounding_decimals` from configuration.
 
 ## Formula Placeholder
