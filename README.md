@@ -6,11 +6,35 @@ The client requires full Python source code, not only a compiled executable, so 
 
 ## Current Scope
 
-This initial scaffold provides the package structure, configuration defaults, CLI entrypoint placeholder, and smoke tests. It does **not** implement real scraping, browser automation, marketplace integrations, or API collection yet.
+This initial scaffold provides the repository and package foundation for a local-only Excel automation tool. It does **not** perform the full Excel comparison workflow yet.
 
-Future scraping, API, or browser automation is explicitly out of scope for the paid-test phase and is represented only by a stub module for later extension planning.
+Future scraping, API, or browser automation is explicitly out of scope for the paid-test scaffold phase and is represented only by a stub module for later extension planning.
+
+## Implemented in this scaffold
+
+The current repository includes only the foundation needed for upcoming implementation phases:
+
+- Package scaffold under `src/excel_sales_automation`.
+- CLI placeholder exposed through the `excel-sales-compare` console script.
+- Default configuration file at `config/default_config.yaml`.
+- Smoke test confirming the package imports and exposes a version string.
+- Local-only Excel automation project structure for future comparison/reporting work.
+
+## Planned in upcoming phases
+
+The following items are planned but are **not implemented** in this scaffold:
+
+- Real YAML config loading.
+- Excel input reading.
+- Product-code normalization.
+- Row matching.
+- Price difference and margin-rate calculations.
+- Formatted Excel report export.
+- Future scraping/API/browser automation extension points through a stub only.
 
 ## Planned Workflow
+
+The future workflow is expected to be:
 
 1. Load a baseline Excel file.
 2. Load a comparison Excel file.
@@ -36,7 +60,7 @@ After installation, the CLI command will be available as:
 excel-sales-compare --help
 ```
 
-The comparison workflow is not implemented in this scaffold phase. The CLI currently exposes a safe placeholder entrypoint.
+The comparison workflow is not implemented in this scaffold phase. The CLI currently exposes a safe placeholder entrypoint only.
 
 ## Default Configuration
 

@@ -1,8 +1,8 @@
-"""Metric calculation helpers."""
+"""Metric calculation placeholders."""
 
 from __future__ import annotations
 
 
-def calculate_price_difference(baseline_price: float, comparison_price: float) -> float:
-    """Calculate the absolute price difference."""
-    return comparison_price - baseline_price
+def calculate_metrics() -> None:
+    """Placeholder for future price difference and margin-rate calculations."""
+    raise NotImplementedError("Metric calculations are not implemented yet.")
