@@ -70,8 +70,11 @@ class InvalidRow:
 
 @dataclass(frozen=True, slots=True)
 class ComparisonResult:
-    """Placeholder model for future comparison results."""
+    """Report-ready comparison tables and summary counts."""
 
-    output_path: Path
-    matched_rows: int
-    unmatched_rows: int
+    matched_rows: object
+    missing_in_baseline: object
+    missing_in_comparison: object
+    duplicates: object
+    invalid_rows: object
+    summary: dict[str, int]

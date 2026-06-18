@@ -110,6 +110,14 @@ Price and cost values may be numeric cells or strings containing commas and comm
 
 Normalization validates that required product-code and price columns exist, then returns a cleaned DataFrame copy plus invalid row details; it does not mutate caller-provided DataFrames in place.
 
+## Matching Behavior
+
+Comparison uses normalized product-code values as exact join keys. Clean one-to-one product codes are matched with baseline columns suffixed as `_baseline` and comparison columns suffixed as `_comparison`, plus a canonical `product_code` output column.
+
+Unmatched rows are preserved in separate report-ready tables: products present only in the comparison file are `missing_in_baseline`, and products present only in the baseline file are `missing_in_comparison`. Rows with missing product codes are excluded from matching and included in invalid-row output.
+
+Duplicate product codes are ambiguous. With `duplicate_policy: fail`, comparison raises an error that lists duplicate source rows. With `duplicate_policy: report`, duplicate rows are reported and excluded from clean matched calculations instead of silently choosing one row.
+
 ## Formula Placeholder
 
 The intended default calculations are:
