@@ -29,7 +29,7 @@ class ConfigError(ValueError):
     """Raised when configuration cannot be loaded or validated."""
 
 
-def load_config(config_path: Path | None = None) -> AppConfig:
+def load_config(config_path: str | Path | None = None) -> AppConfig:
     """Load and validate application configuration from YAML."""
     resolved_path = Path(config_path) if config_path is not None else DEFAULT_CONFIG_PATH
     logger.debug("Loading configuration from %s", resolved_path)

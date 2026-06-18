@@ -253,3 +253,20 @@ matching:
     config = load_config(config_path)
 
     assert config.runtime.duplicate_policy == "fail"
+
+
+def test_load_config_accepts_string_path(tmp_path: Path) -> None:
+    config_path = write_config(
+        tmp_path / "string-path.yaml",
+        """
+columns:
+  baseline_product_code_column: product_code
+  comparison_product_code_column: product_code
+  baseline_price_column: baseline_price
+  comparison_price_column: comparison_price
+""",
+    )
+
+    config = load_config(str(config_path))
+
+    assert config.source_path == config_path
