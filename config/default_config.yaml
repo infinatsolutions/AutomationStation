@@ -1,0 +1,11 @@
+columns:
+  baseline_product_code_column: product_code
+  comparison_product_code_column: product_code
+  baseline_price_column: baseline_price
+  comparison_price_column: comparison_price
+  cost_column: cost
+formulas:
+  margin_formula: auto
+  rounding_decimals: 2
+matching:
+  duplicate_policy: report
