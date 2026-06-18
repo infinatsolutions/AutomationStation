@@ -5,6 +5,7 @@ from __future__ import annotations
 import importlib
 import importlib.util
 import logging
+import math
 import zipfile
 from datetime import UTC, datetime
 from pathlib import Path
@@ -211,7 +212,7 @@ def _write_openpyxl_records(worksheet: Any, records: list[dict[str, Any]]) -> No
     headers = _headers(records)
     worksheet.append(headers)
     for record in records:
-        worksheet.append([record.get(header) for header in headers])
+        worksheet.append([_report_cell_value(record.get(header)) for header in headers])
 
 
 def _format_openpyxl_numeric_columns(worksheet: Any) -> None:
@@ -274,9 +275,18 @@ def _row_xml(row_index: int, values: list[Any]) -> str:
 
 def _cell_xml(row_index: int, column_index: int, value: Any) -> str:
     reference = f"{_column_letter(column_index)}{row_index}"
+    value = _report_cell_value(value)
+    if value is None:
+        return f'<c r="{reference}"/>'
     if isinstance(value, int | float) and not isinstance(value, bool):
         return f'<c r="{reference}"><v>{value}</v></c>'
     return f'<c r="{reference}" t="inlineStr"><is><t>{escape(str(value))}</t></is></c>'
+
+
+def _report_cell_value(value: Any) -> Any:
+    if isinstance(value, float) and math.isnan(value):
+        return None
+    return value
 
 
 def _column_letter(index: int) -> str:

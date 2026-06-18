@@ -119,3 +119,18 @@ def test_matched_sheet_contains_calculated_columns(tmp_path: Path) -> None:
     assert "price_difference_rate" in matched_xml
     assert "margin_rate" in matched_xml
     assert "calculation_status" in matched_xml
+
+
+def test_export_excel_report_does_not_write_nan_numeric_values(tmp_path: Path) -> None:
+    result = make_result()
+    result.matched_rows.records[0]["margin_rate"] = float("nan")
+
+    output_path = export_excel_report(result, tmp_path / "report.xlsx")
+
+    matched_xml = workbook_xml(output_path, "xl/worksheets/sheet2.xml")
+    assert "<v>nan</v>" not in matched_xml
+
+
+def test_table_to_records_rejects_unsupported_table_type() -> None:
+    with pytest.raises(ReportExportError, match="Unsupported report table type"):
+        table_to_records(object())
