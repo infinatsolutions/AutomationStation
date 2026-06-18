@@ -136,6 +136,21 @@ When both baseline and comparison cost values are present, comparison cost is us
 
 Division by zero and missing numeric inputs do not crash the application. They produce missing metric values with `calculation_status` set to `warning` or `invalid` and a human-readable `calculation_warning`. Numeric outputs are rounded with `rounding_decimals` from configuration.
 
+## Output Workbook Structure
+
+The final report writer creates a local `.xlsx` workbook for business review. Output directories are created automatically and existing files are overwritten by default.
+
+The workbook contains these sheets:
+
+- `Summary`: run timestamp, input file names, config path, row counts, formula definitions, assumptions, and calculation status counts
+- `Matched`: matched product rows with calculated values such as `price_difference`, `price_difference_rate`, `margin_rate`, `calculation_status`, and `calculation_warning`
+- `Missing_In_Baseline`: products present only in the comparison workbook
+- `Missing_In_Comparison`: products present only in the baseline workbook
+- `Duplicates`: duplicate product-code rows by source workbook
+- `Invalid_Rows`: missing product codes and normalization/calculation issues that should be reviewed
+
+The workbook uses readable formatting such as styled headers, frozen top rows, filters, practical column widths, and numeric formats when `openpyxl` is available. In constrained environments, a minimal standards-compliant `.xlsx` writer is used so report generation remains testable without external services.
+
 ## Formula Placeholder
 
 The intended default calculations are:
