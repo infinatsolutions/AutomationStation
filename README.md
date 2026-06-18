@@ -16,7 +16,7 @@ The current repository includes only the foundation needed for upcoming implemen
 
 - Package scaffold under `src/excel_sales_automation`.
 - CLI placeholder exposed through the `excel-sales-compare` console script.
-- Default configuration file at `config/default_config.yaml`.
+- Default configuration file at `config/default_config.yaml` with typed YAML loading and validation.
 - Smoke test confirming the package imports and exposes a version string.
 - Local-only Excel automation project structure for future comparison/reporting work.
 
@@ -24,7 +24,6 @@ The current repository includes only the foundation needed for upcoming implemen
 
 The following items are planned but are **not implemented** in this scaffold:
 
-- Real YAML config loading.
 - Excel input reading.
 - Product-code normalization.
 - Row matching.
@@ -64,7 +63,7 @@ The comparison workflow is not implemented in this scaffold phase. The CLI curre
 
 ## Default Configuration
 
-Default column mappings live in `config/default_config.yaml`:
+Default column mappings live in `config/default_config.yaml`. The CLI can load this default file or a user-provided YAML config path in later workflow phases. Use config overrides when the client workbook uses different column names or sheet names:
 
 - `baseline_product_code_column`: product code column in the baseline workbook
 - `comparison_product_code_column`: product code column in the comparison workbook
@@ -74,6 +73,32 @@ Default column mappings live in `config/default_config.yaml`:
 - `margin_formula`: formula selection mode
 - `duplicate_policy`: duplicate product-code handling mode
 - `rounding_decimals`: numeric rounding precision for report metrics
+- `baseline_sheet_name`: baseline workbook sheet name, sheet index, or `null`
+- `comparison_sheet_name`: comparison workbook sheet name, sheet index, or `null`
+
+Supported values:
+
+- `margin_formula`: `auto`, `price_difference_over_comparison`, or `gross_margin`
+- `duplicate_policy`: `report` or `fail`
+
+
+Example override file:
+
+```yaml
+columns:
+  baseline_product_code_column: SKU
+  comparison_product_code_column: SKU
+  baseline_price_column: Old Price
+  comparison_price_column: New Price
+  cost_column: Cost
+formulas:
+  margin_formula: gross_margin
+  rounding_decimals: 2
+runtime:
+  baseline_sheet_name: Products
+  comparison_sheet_name: Products
+  duplicate_policy: report
+```
 
 ## Formula Placeholder
 

@@ -15,6 +15,7 @@ authors = [
 dependencies = [
   "openpyxl>=3.1.0",
   "pandas>=2.2.0",
+  "PyYAML>=6.0.0",
 ]
 
 [project.optional-dependencies]

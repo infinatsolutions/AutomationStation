@@ -7,5 +7,7 @@ columns:
 formulas:
   margin_formula: auto
   rounding_decimals: 2
-matching:
+runtime:
+  baseline_sheet_name: null
+  comparison_sheet_name: null
   duplicate_policy: report
