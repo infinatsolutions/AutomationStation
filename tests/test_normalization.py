@@ -106,3 +106,38 @@ def test_normalize_sales_dataframe_returns_clean_copy_and_invalid_rows() -> None
     assert len(result.invalid_rows) == 3
     assert {issue.column_name for issue in result.invalid_rows} == {"product_code", "price", "cost"}
     assert [issue.row_number for issue in result.invalid_rows] == [3, 4, 4]
+
+
+def test_normalize_sales_dataframe_rejects_missing_required_columns() -> None:
+    frame = FakeFrame([{"product_code": "001", "cost": "5"}])
+
+    from excel_sales_automation.normalization import NormalizationError
+
+    try:
+        normalize_sales_dataframe(
+            frame,
+            product_code_column="product_code",
+            price_column="price",
+            cost_column="cost",
+        )
+    except NormalizationError as exc:
+        message = str(exc)
+    else:  # pragma: no cover - defensive failure path
+        raise AssertionError("Expected NormalizationError")
+
+    assert "price" in message
+    assert "product_code" in message
+
+
+def test_normalize_sales_dataframe_allows_missing_optional_cost_column() -> None:
+    frame = FakeFrame([{"product_code": "001", "price": "$10"}])
+
+    result = normalize_sales_dataframe(
+        frame,
+        product_code_column="product_code",
+        price_column="price",
+        cost_column="cost",
+    )
+
+    assert result.data.rows[0]["price"] == 10.0
+    assert result.invalid_rows == []

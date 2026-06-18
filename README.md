@@ -108,7 +108,7 @@ Column names are matched exactly using the configured mappings. Product-code col
 
 Price and cost values may be numeric cells or strings containing commas and common currency symbols such as `$`. Invalid required prices are tracked as invalid row issues and converted to missing numeric values in the normalized copy. Optional cost values may be blank, but invalid non-blank cost values are also tracked.
 
-Normalization returns a cleaned DataFrame copy plus invalid row details; it does not mutate caller-provided DataFrames in place.
+Normalization validates that required product-code and price columns exist, then returns a cleaned DataFrame copy plus invalid row details; it does not mutate caller-provided DataFrames in place.
 
 ## Formula Placeholder
 

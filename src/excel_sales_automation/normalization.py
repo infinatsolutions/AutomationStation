@@ -25,6 +25,10 @@ class NormalizationResult:
     invalid_rows: list[InvalidRow]
 
 
+class NormalizationError(ValueError):
+    """Raised when input data cannot be normalized safely."""
+
+
 def normalize_product_code(value: Any) -> str | None:
     """Normalize a product code while preserving leading zeros in text values."""
     if _is_missing(value):
@@ -71,6 +75,7 @@ def normalize_sales_dataframe(
     cost_column: str | None = None,
 ) -> NormalizationResult:
     """Normalize sales rows without mutating the input DataFrame."""
+    _validate_normalization_columns(frame, product_code_column, price_column, cost_column)
     normalized = frame.copy(deep=True)
     invalid_rows: list[InvalidRow] = []
 
@@ -114,6 +119,26 @@ def normalize_sales_dataframe(
 
     logger.info("Normalized %s rows with %s invalid row issues", len(frame), len(invalid_rows))
     return NormalizationResult(data=normalized, invalid_rows=invalid_rows)
+
+
+def _validate_normalization_columns(
+    frame: Any,
+    product_code_column: str,
+    price_column: str,
+    cost_column: str | None,
+) -> None:
+    columns = set(frame.columns)
+    required_columns = [product_code_column, price_column]
+    missing_columns = [column for column in required_columns if column not in columns]
+    if missing_columns:
+        raise NormalizationError(
+            f"Cannot normalize data because required columns are missing: {missing_columns}. "
+            f"Available columns: {sorted(str(column) for column in columns)}."
+        )
+    if cost_column is not None and cost_column not in columns:
+        logger.info(
+            "Optional cost column %s is not present; cost normalization skipped.", cost_column
+        )
 
 
 def _is_missing(value: Any) -> bool:
