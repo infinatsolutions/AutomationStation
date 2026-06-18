@@ -152,3 +152,41 @@ def test_passed_invalid_rows_are_included_in_invalid_output() -> None:
     assert invalid_rows[0]["source"] == "baseline"
     assert invalid_rows[0]["reason"] == "Invalid required price."
     assert result.summary["invalid_row_count"] == 1
+
+
+def test_duplicate_row_numbers_preserve_original_positions_after_missing_codes() -> None:
+    result = compare_sales_dataframes(
+        [
+            {"product_code": None, "price": 5.0},
+            {"product_code": "001", "price": 10.0},
+            {"product_code": "001", "price": 12.0},
+        ],
+        [{"product_code": "002", "price": 20.0}],
+        baseline_product_code_column="product_code",
+        comparison_product_code_column="product_code",
+        duplicate_policy="report",
+    )
+
+    assert [row["row_number"] for row in records(result.duplicates)] == [3, 4]
+    assert records(result.invalid_rows)[0]["row_number"] == 2
+
+
+def test_invalid_numeric_rows_can_still_match_by_product_code() -> None:
+    invalid = InvalidRow(
+        row_number=2,
+        column_name="price",
+        reason="Invalid required price.",
+        raw_value="bad",
+        raw_values={"product_code": "001", "price": "bad"},
+    )
+
+    result = compare_sales_dataframes(
+        [{"product_code": "001", "price": float("nan")}],
+        [{"product_code": "001", "price": 11.0}],
+        baseline_product_code_column="product_code",
+        comparison_product_code_column="product_code",
+        baseline_invalid_rows=[invalid],
+    )
+
+    assert [row["product_code"] for row in records(result.matched_rows)] == ["001"]
+    assert result.summary["invalid_row_count"] == 1

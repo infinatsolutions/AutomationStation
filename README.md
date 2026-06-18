@@ -114,7 +114,7 @@ Normalization validates that required product-code and price columns exist, then
 
 Comparison uses normalized product-code values as exact join keys. Clean one-to-one product codes are matched with baseline columns suffixed as `_baseline` and comparison columns suffixed as `_comparison`, plus a canonical `product_code` output column.
 
-Unmatched rows are preserved in separate report-ready tables: products present only in the comparison file are `missing_in_baseline`, and products present only in the baseline file are `missing_in_comparison`. Rows with missing product codes are excluded from matching and included in invalid-row output.
+Unmatched rows are preserved in separate report-ready tables: products present only in the comparison file are `missing_in_baseline`, and products present only in the baseline file are `missing_in_comparison`. Rows with missing product codes are excluded from matching and included in invalid-row output. Rows with valid product codes but invalid numeric fields may still match by product code; downstream calculation steps must exclude or flag them using the invalid-row output.
 
 Duplicate product codes are ambiguous. With `duplicate_policy: fail`, comparison raises an error that lists duplicate source rows. With `duplicate_policy: report`, duplicate rows are reported and excluded from clean matched calculations instead of silently choosing one row.
 

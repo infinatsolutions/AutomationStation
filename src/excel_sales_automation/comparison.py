@@ -74,8 +74,8 @@ def compare_sales_dataframes(
         )
 
     return _compare_records(
-        _records_from_frame(baseline_frame),
-        _records_from_frame(comparison_frame),
+        _with_source_positions(_records_from_frame(baseline_frame)),
+        _with_source_positions(_records_from_frame(comparison_frame)),
         baseline_product_code_column=baseline_product_code_column,
         comparison_product_code_column=comparison_product_code_column,
         duplicate_policy=duplicate_policy,
@@ -94,6 +94,8 @@ def _compare_with_pandas(
     baseline_invalid_rows: Sequence[InvalidRow],
     comparison_invalid_rows: Sequence[InvalidRow],
 ) -> ComparisonResult:
+    baseline_frame = _pandas_with_source_positions(baseline_frame)
+    comparison_frame = _pandas_with_source_positions(comparison_frame)
     baseline_valid, baseline_missing = _split_pandas_missing_codes(
         baseline_frame, baseline_product_code_column, BASELINE_SOURCE
     )
@@ -260,6 +262,27 @@ def _records_from_frame(frame: Any) -> list[dict[str, Any]]:
     raise ComparisonError("Unsupported frame type for comparison.")
 
 
+def _with_source_positions(records: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    positioned: list[dict[str, Any]] = []
+    for index, record in enumerate(records):
+        positioned.append({"__row_index": index, "__row_number": index + 2, **record})
+    return positioned
+
+
+def _record_row_index(record: Mapping[str, Any], fallback: int) -> int:
+    value = record.get("__row_index", fallback)
+    return int(value) if isinstance(value, int) else fallback
+
+
+def _record_row_number(record: Mapping[str, Any], fallback: int) -> int:
+    value = record.get("__row_number", fallback)
+    return int(value) if isinstance(value, int) else fallback
+
+
+def _public_record(record: Mapping[str, Any]) -> dict[str, Any]:
+    return {key: value for key, value in record.items() if not str(key).startswith("__")}
+
+
 def _split_missing_codes(
     records: Iterable[Mapping[str, Any]], product_code_column: str, source: str
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
@@ -267,15 +290,17 @@ def _split_missing_codes(
     invalid: list[dict[str, Any]] = []
     for index, record in enumerate(records):
         product_code = record.get(product_code_column)
+        row_index = _record_row_index(record, index)
+        row_number = _record_row_number(record, row_index + 2)
         if product_code is None or str(product_code).strip() == "":
             invalid.append(
                 {
                     "source": source,
                     "product_code": product_code,
-                    "row_index": index,
-                    "row_number": index + 2,
+                    "row_index": row_index,
+                    "row_number": row_number,
                     "reason": "Missing product code.",
-                    **{f"{key}_{source}": value for key, value in record.items()},
+                    **{f"{key}_{source}": value for key, value in _public_record(record).items()},
                 }
             )
         else:
@@ -294,14 +319,15 @@ def _duplicate_records(
     for product_code, group in sorted(grouped.items()):
         if len(group) <= 1:
             continue
-        for index, record in group:
+        for fallback_index, record in group:
+            row_index = _record_row_index(record, fallback_index)
             duplicates.append(
                 {
                     "source": source,
                     "product_code": product_code,
-                    "row_index": index,
-                    "row_number": index + 2,
-                    **{f"{key}_{source}": value for key, value in record.items()},
+                    "row_index": row_index,
+                    "row_number": _record_row_number(record, row_index + 2),
+                    **{f"{key}_{source}": value for key, value in _public_record(record).items()},
                 }
             )
     return duplicates
@@ -337,15 +363,15 @@ def _merged_record(
 ) -> dict[str, Any]:
     return {
         "product_code": product_code,
-        **{f"{key}_baseline": value for key, value in baseline_record.items()},
-        **{f"{key}_comparison": value for key, value in comparison_record.items()},
+        **{f"{key}_baseline": value for key, value in _public_record(baseline_record).items()},
+        **{f"{key}_comparison": value for key, value in _public_record(comparison_record).items()},
     }
 
 
 def _baseline_only_record(product_code: str, baseline_record: Mapping[str, Any]) -> dict[str, Any]:
     return {
         "product_code": product_code,
-        **{f"{key}_baseline": value for key, value in baseline_record.items()},
+        **{f"{key}_baseline": value for key, value in _public_record(baseline_record).items()},
     }
 
 
@@ -354,7 +380,7 @@ def _comparison_only_record(
 ) -> dict[str, Any]:
     return {
         "product_code": product_code,
-        **{f"{key}_comparison": value for key, value in comparison_record.items()},
+        **{f"{key}_comparison": value for key, value in _public_record(comparison_record).items()},
     }
 
 
@@ -383,6 +409,13 @@ def _invalid_row_record(source: str, invalid_row: InvalidRow) -> dict[str, Any]:
 
 def _frame_from_records(records: list[dict[str, Any]]) -> Any:
     return pd.DataFrame(records) if pd is not None else SimpleDataFrame(records)
+
+
+def _pandas_with_source_positions(frame: Any) -> Any:
+    positioned = frame.copy()
+    positioned["__row_index"] = list(range(len(positioned)))
+    positioned["__row_number"] = positioned["__row_index"] + 2
+    return positioned
 
 
 def _split_pandas_missing_codes(
