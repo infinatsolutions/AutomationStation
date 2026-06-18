@@ -5,7 +5,6 @@ from __future__ import annotations
 import argparse
 import logging
 from pathlib import Path
-from typing import NoReturn
 
 from excel_sales_automation import __version__
 from excel_sales_automation.calculations import CalculationError
@@ -145,10 +144,6 @@ def _parse_sheet_override(value: str | None) -> str | int | None:
     if value is None:
         return None
     return int(value) if value.isdigit() else value
-
-
-def _unreachable() -> NoReturn:
-    raise AssertionError("unreachable")
 
 
 if __name__ == "__main__":

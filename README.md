@@ -84,7 +84,7 @@ The CLI runs locally only: it reads local Excel workbooks, applies configured co
 
 ## Default Configuration
 
-Default column mappings live in `config/default_config.yaml`. The CLI already validates this default file or a user-provided YAML config path; the Excel comparison workflow itself remains planned for upcoming phases. Use config overrides when the client workbook uses different column names or sheet names:
+Default column mappings live in `config/default_config.yaml`. The CLI validates this default file or a user-provided YAML config path and uses these mappings during the local Excel comparison workflow. Use config overrides when the client workbook uses different column names or sheet names:
 
 - `baseline_product_code_column`: product code column in the baseline workbook
 - `comparison_product_code_column`: product code column in the comparison workbook
