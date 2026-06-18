@@ -13,6 +13,9 @@ if importlib.util.find_spec("yaml") is not None:
 else:
     yaml = None
 
+# The fallback parser keeps local tests usable in constrained environments where the
+# declared PyYAML dependency cannot be installed. Production installs should use PyYAML.
+
 from excel_sales_automation.models import AppConfig, ColumnConfig, FormulaConfig, RuntimeOptions
 
 logger = logging.getLogger(__name__)
@@ -159,7 +162,7 @@ def _optional_string(
 
 def _optional_int(section: Mapping[str, Any], key: str, default: int) -> int:
     value = section.get(key, default)
-    if not isinstance(value, int):
+    if isinstance(value, bool) or not isinstance(value, int):
         raise ConfigError(f"Configuration field '{key}' must be an integer.")
     return value
 
@@ -168,6 +171,10 @@ def _optional_sheet_name(section: Mapping[str, Any], key: str) -> str | int | No
     value = section.get(key)
     if value is None:
         return None
+    if isinstance(value, bool):
+        raise ConfigError(
+            f"Configuration field '{key}' must be a sheet name string, integer, or null."
+        )
     if isinstance(value, int):
         return value
     if isinstance(value, str) and value.strip():
@@ -210,9 +217,13 @@ def _parse_simple_yaml(text: str, path: Path) -> Mapping[str, Any] | None:
     return parsed
 
 
-def _parse_scalar(value: str) -> str | int | None:
+def _parse_scalar(value: str) -> str | int | bool | None:
     if value in {"null", "~"}:
         return None
+    if value in {"true", "True"}:
+        return True
+    if value in {"false", "False"}:
+        return False
     if value.startswith(('"', "'")) and value.endswith(('"', "'")):
         return value[1:-1]
     if value.lstrip("-").isdigit():

@@ -161,3 +161,95 @@ formulas:
 
     with pytest.raises(ConfigError, match="rounding_decimals"):
         load_config(config_path)
+
+
+def test_boolean_rounding_decimals_raises_config_error(tmp_path: Path) -> None:
+    config_path = write_config(
+        tmp_path / "boolean-rounding.yaml",
+        """
+columns:
+  baseline_product_code_column: product_code
+  comparison_product_code_column: product_code
+  baseline_price_column: baseline_price
+  comparison_price_column: comparison_price
+formulas:
+  rounding_decimals: true
+""",
+    )
+
+    with pytest.raises(ConfigError, match="rounding_decimals"):
+        load_config(config_path)
+
+
+def test_boolean_sheet_name_raises_config_error(tmp_path: Path) -> None:
+    config_path = write_config(
+        tmp_path / "boolean-sheet.yaml",
+        """
+columns:
+  baseline_product_code_column: product_code
+  comparison_product_code_column: product_code
+  baseline_price_column: baseline_price
+  comparison_price_column: comparison_price
+runtime:
+  baseline_sheet_name: true
+""",
+    )
+
+    with pytest.raises(ConfigError, match="baseline_sheet_name"):
+        load_config(config_path)
+
+
+def test_empty_config_file_raises_config_error(tmp_path: Path) -> None:
+    config_path = write_config(tmp_path / "empty.yaml", "\n")
+
+    with pytest.raises(ConfigError, match="empty"):
+        load_config(config_path)
+
+
+def test_top_level_list_raises_config_error(tmp_path: Path) -> None:
+    config_path = write_config(tmp_path / "list.yaml", "- columns\n- formulas\n")
+
+    with pytest.raises(ConfigError, match="top-level mapping|Invalid YAML syntax"):
+        load_config(config_path)
+
+
+def test_non_mapping_columns_section_raises_config_error(tmp_path: Path) -> None:
+    config_path = write_config(tmp_path / "bad-columns.yaml", "columns: product_code\n")
+
+    with pytest.raises(ConfigError, match="columns"):
+        load_config(config_path)
+
+
+def test_blank_required_column_name_raises_config_error(tmp_path: Path) -> None:
+    config_path = write_config(
+        tmp_path / "blank-column.yaml",
+        """
+columns:
+  baseline_product_code_column: "   "
+  comparison_product_code_column: product_code
+  baseline_price_column: baseline_price
+  comparison_price_column: comparison_price
+""",
+    )
+
+    with pytest.raises(ConfigError, match="baseline_product_code_column"):
+        load_config(config_path)
+
+
+def test_legacy_matching_duplicate_policy_is_supported(tmp_path: Path) -> None:
+    config_path = write_config(
+        tmp_path / "legacy-matching.yaml",
+        """
+columns:
+  baseline_product_code_column: product_code
+  comparison_product_code_column: product_code
+  baseline_price_column: baseline_price
+  comparison_price_column: comparison_price
+matching:
+  duplicate_policy: fail
+""",
+    )
+
+    config = load_config(config_path)
+
+    assert config.runtime.duplicate_policy == "fail"
