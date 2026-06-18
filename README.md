@@ -51,15 +51,36 @@ source .venv/bin/activate
 python -m pip install -e ".[dev]"
 ```
 
-## Usage Placeholder
+## CLI Usage
 
-After installation, the CLI command will be available as:
+Validate configuration only:
 
 ```bash
-excel-sales-compare --help
+excel-sales-compare check-config --config config/default_config.yaml
 ```
 
-The comparison workflow is not implemented in this scaffold phase. The CLI currently exposes a safe placeholder entrypoint only.
+Run the full local Excel comparison workflow:
+
+```bash
+excel-sales-compare compare \
+  --baseline-file path/to/baseline.xlsx \
+  --comparison-file path/to/comparison.xlsx \
+  --output-file path/to/report.xlsx \
+  --config config/default_config.yaml
+```
+
+Optional sheet overrides are available when a workbook needs a specific worksheet:
+
+```bash
+excel-sales-compare compare \
+  --baseline-file baseline.xlsx \
+  --comparison-file comparison.xlsx \
+  --output-file report.xlsx \
+  --baseline-sheet Products \
+  --comparison-sheet Products
+```
+
+The CLI runs locally only: it reads local Excel workbooks, applies configured column mappings, normalizes data, matches by product code, calculates metrics, and writes a local `.xlsx` report. It does not perform scraping, browser automation, API calls, or external credential handling.
 
 ## Default Configuration
 
