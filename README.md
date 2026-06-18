@@ -100,6 +100,16 @@ runtime:
   duplicate_policy: report
 ```
 
+## Input File Expectations
+
+The current input layer supports local `.xlsx` and `.xlsm` workbooks through `pandas` and `openpyxl`. Legacy `.xls` files should be converted to `.xlsx` before processing.
+
+Column names are matched exactly using the configured mappings. Product-code columns are read as text where possible so leading zeros are preserved when Excel stores the value as text. During normalization, blank product codes, `NaN`, `nan`, and `None` are treated as missing and tracked as invalid row issues.
+
+Price and cost values may be numeric cells or strings containing commas and common currency symbols such as `$`. Invalid required prices are tracked as invalid row issues and converted to missing numeric values in the normalized copy. Optional cost values may be blank, but invalid non-blank cost values are also tracked.
+
+Normalization returns a cleaned DataFrame copy plus invalid row details; it does not mutate caller-provided DataFrames in place.
+
 ## Formula Placeholder
 
 The intended default calculations are:

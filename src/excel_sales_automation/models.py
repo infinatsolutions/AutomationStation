@@ -58,6 +58,17 @@ class AppConfig:
 
 
 @dataclass(frozen=True, slots=True)
+class InvalidRow:
+    """Row-level data-quality issue found during input normalization."""
+
+    row_number: int
+    column_name: str
+    reason: str
+    raw_value: object
+    raw_values: dict[str, object]
+
+
+@dataclass(frozen=True, slots=True)
 class ComparisonResult:
     """Placeholder model for future comparison results."""
 
