@@ -118,6 +118,22 @@ Unmatched rows are preserved in separate report-ready tables: products present o
 
 Duplicate product codes are ambiguous. With `duplicate_policy: fail`, comparison raises an error that lists duplicate source rows. With `duplicate_policy: report`, duplicate rows are reported and excluded from clean matched calculations instead of silently choosing one row.
 
+## Financial Calculation Assumptions
+
+Financial metrics are calculated only for matched product-code rows. The default assumptions are explicit because the paid-test prompt does not define a single required margin formula.
+
+Calculated columns include `price_difference`, `price_difference_rate`, `margin_rate`, `margin_formula_used`, `calculation_status`, and `calculation_warning`.
+
+Formulas:
+
+- `price_difference = comparison_price - baseline_price`
+- `price_difference_rate = price_difference / baseline_price`
+- `price_difference_over_comparison`: `margin_rate = price_difference / comparison_price`
+- `gross_margin`: `margin_rate = (comparison_price - cost) / comparison_price`
+- `auto`: use `gross_margin` when a valid cost exists for the row; otherwise use `price_difference_over_comparison`
+
+Division by zero and missing numeric inputs do not crash the application. They produce missing metric values with `calculation_status` set to `warning` or `invalid` and a human-readable `calculation_warning`. Numeric outputs are rounded with `rounding_decimals` from configuration.
+
 ## Formula Placeholder
 
 The intended default calculations are:
